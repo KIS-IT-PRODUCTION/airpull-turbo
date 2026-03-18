@@ -6,7 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Дозволяємо нашому фронтенду (на порту 3000) робити сюди запити
+  // Дозволяємо нашому фронтенду робити сюди запити
   app.enableCors();
 
   // Налаштовуємо магію Swagger
@@ -16,8 +16,10 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document); // Це адреса, де буде жити наша панель
+  SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(4004);
+  // ЗМІНА ТУТ:
+  // Якщо є порт від Render - беремо його, якщо ні (локально) - беремо 4004
+  await app.listen(process.env.PORT || 4004);
 }
 bootstrap();
