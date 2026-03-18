@@ -48,28 +48,27 @@ export default async function ProductPage({ params }: Props) {
 
   const inStock = product.stock > 0;
 
-  // 💡 ЗБІР ЗОБРАЖЕНЬ З БЕКЕНДУ
+  // --- ЛОГІКА ЗБОРУ ЗОБРАЖЕНЬ (ВИПРАВЛЕНО) ---
   const productImages: string[] = [];
   
-  // Додаємо головне зображення
   if (product.imageUrl) {
     productImages.push(product.imageUrl);
   }
 
-  // Додаємо додаткові зображення з масиву images (якщо вони є в БД)
-  // Використовуємо optional chaining та перевірку на дублікати
   const extraImages = (product as any).images;
   if (Array.isArray(extraImages)) {
-    extraImages.forEach((img: string) => {
-      if (img && img !== product.imageUrl) {
-        productImages.push(img);
+    extraImages.forEach((img: any) => {
+      // Якщо img - це об'єкт (як у Swagger), беремо img.url, якщо рядок - беремо img
+      const url = typeof img === 'string' ? img : img?.url;
+      if (url && url !== product.imageUrl) {
+        productImages.push(url);
       }
     });
   }
-
-  // Якщо в базі тільки одне фото, для тесту галереї можна залишити дублювання, 
-  // але для продакшну краще просто передати одне фото:
   const finalImages = productImages.length > 0 ? productImages : [];
+
+  // --- ЛОГІКА ХАРАКТЕРИСТИК (ДИНАМІЧНА) ---
+  const dbSpecs = (product as any).specifications || [];
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -142,8 +141,7 @@ export default async function ProductPage({ params }: Props) {
                 </div>
               )}
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-8">
-                {/* 🚀 ВИКОРИСТОВУЄМО НАШУ НОВУ КНОПКУ */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-8">
                 <AddToCartButton 
                   product={{
                     id: product.id,
@@ -171,17 +169,35 @@ export default async function ProductPage({ params }: Props) {
           <section className="mt-16 pt-16 border-t border-white/10">
             <h2 className="text-2xl font-black text-white mb-6">Характеристики</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { label: 'Артикул', value: product.id.slice(0, 8).toUpperCase() },
-                { label: 'Ціна', value: `${product.price.toLocaleString('uk-UA')} ₴` },
-                { label: 'Наявність', value: inStock ? 'Так' : 'Ні' },
-                { label: 'Доставка', value: 'Нова Пошта' },
-              ].map((row) => (
-                <div key={row.label} className="bg-white/5 border border-white/10 rounded-xl p-4">
-                  <p className="text-white/40 text-xs uppercase tracking-widest mb-1">{row.label}</p>
-                  <p className="text-white font-semibold">{row.value}</p>
+              {/* Стандартні характеристики */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Артикул</p>
+                <p className="text-white font-semibold">{product.id.slice(0, 8).toUpperCase()}</p>
+              </div>
+
+              {/* Характеристики з бази даних (якщо є) */}
+              {Array.isArray(dbSpecs) && dbSpecs.map((spec: any, index: number) => (
+                <div key={index} className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <p className="text-white/40 text-xs uppercase tracking-widest mb-1">
+                    {spec.key || 'Характеристика'}
+                  </p>
+                  <p className="text-white font-semibold">{spec.value || '-'}</p>
                 </div>
               ))}
+
+              {/* Якщо характеристик мало, додаємо заповнювачі */}
+              {(!dbSpecs || dbSpecs.length === 0) && (
+                <>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Наявність</p>
+                    <p className="text-white font-semibold">{inStock ? 'Так' : 'Ні'}</p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Доставка</p>
+                    <p className="text-white font-semibold">Нова Пошта</p>
+                  </div>
+                </>
+              )}
             </div>
           </section>
 
