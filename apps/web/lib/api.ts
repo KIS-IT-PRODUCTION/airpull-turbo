@@ -1,6 +1,6 @@
 import type { Product } from '@/types/product';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4004';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://airpull-api.onrender.com';
 
 export async function getProducts(): Promise<Product[]> {
   try {
@@ -40,9 +40,10 @@ export const authApi = {
       throw new Error("Помилка відправки коду. Спробуй ще раз.");
     }
     
-    // Якщо бекенд нічого не повертає на цей запит (наприклад, статусу 201 вистачає),
-    // можна просто повернути true. Але якщо повертає JSON, робимо res.json()
-    return true; 
+    // ЗМІНА ТУТ: Тепер ми реально читаємо відповідь від бекенду, 
+    // щоб фронтенд побачив { success: true, testCode: "1234" }
+    const data = await res.json();
+    return data; 
   },
 
   // Перевірка коду та логін

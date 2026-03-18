@@ -21,7 +21,17 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await authApi.sendCode(phone);
+      // ЗМІНА ТУТ: Зберігаємо результат запиту в змінну response
+      const response = (await authApi.sendCode(phone)) as any;
+      
+      // Показуємо тестовий код у спливаючому вікні
+      if (response && response.testCode) {
+        alert(`🔑 ТЕСТОВИЙ КОД: ${response.testCode}`);
+      } else {
+        // Якщо раптом authApi не повертає testCode, просто попереджаємо
+        console.log("Відповідь від сервера:", response);
+      }
+
       setStep(2);
     } catch (err: any) {
       setError(err.message || "Сталася помилка");
