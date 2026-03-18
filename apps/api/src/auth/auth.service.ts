@@ -9,7 +9,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async sendCode(phone: string) {
+async sendCode(phone: string) {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 5);
@@ -28,19 +28,21 @@ export class AuthService {
           body: JSON.stringify({
             recipients: [phone],
             sms: {
-              sender: 'Msg',
+              sender: 'Airpull',
               text: `Airpull код: ${code}`
             }
           })
         });
 
         const data = await response.json();
+        console.log('Відповідь TurboSMS:', data);
         
         if (data.response_code !== 800) {
-          throw new BadRequestException('Не вдалося відправити SMS.');
+          throw new BadRequestException(`Помилка шлюзу: ${data.response_status}`);
         }
       } catch (error) {
-        throw new BadRequestException('Помилка відправки SMS.');
+        console.error('Помилка API:', error);
+        throw new BadRequestException('Не вдалося відправити SMS.');
       }
     } else {
       throw new BadRequestException('Помилка сервера: SMS не налаштовано');
