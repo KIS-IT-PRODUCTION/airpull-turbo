@@ -9,7 +9,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async sendCode(phone: string) {
+async sendCode(phone: string) {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 5);
@@ -18,7 +18,13 @@ export class AuthService {
     await this.prisma.otpCode.create({ data: { phone, code, expiresAt } });
 
     console.log(`\n📲 [SMS] Код підтвердження для ${phone}: ${code}\n`);
-    return { success: true, message: 'Код відправлено' };
+    
+    // ЗМІНА ТУТ: Додаємо testCode у відповідь
+    return { 
+      success: true, 
+      message: 'Код відправлено',
+      testCode: code // <--- Ось цей рядок відправить код на фронтенд
+    };
   }
 
   async verifyCode(phone: string, code: string, name?: string) {
