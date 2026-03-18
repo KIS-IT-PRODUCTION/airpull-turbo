@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "database": "postgresql://root:rootpassword@localhost:5432/airpull_db?schema=public",
+            "username": "postgres",
+            "name": "db_connect"
+        }
+    ]
+}
