@@ -9,7 +9,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-async sendCode(phone: string) {
+  async sendCode(phone: string) {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 5);
@@ -17,14 +17,36 @@ async sendCode(phone: string) {
     await this.prisma.otpCode.deleteMany({ where: { phone } });
     await this.prisma.otpCode.create({ data: { phone, code, expiresAt } });
 
-    console.log(`\n📲 [SMS] Код підтвердження для ${phone}: ${code}\n`);
-    
-    // ЗМІНА ТУТ: Додаємо testCode у відповідь
-    return { 
-      success: true, 
-      message: 'Код відправлено',
-      testCode: code // <--- Ось цей рядок відправить код на фронтенд
-    };
+    if (process.env.TURBOSMS_TOKEN) {
+      try {
+        const response = await fetch('https://api.turbosms.ua/message/send.json', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.TURBOSMS_TOKEN}`
+          },
+          body: JSON.stringify({
+            recipients: [phone],
+            sms: {
+              sender: 'Msg',
+              text: `Airpull код: ${code}`
+            }
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.response_code !== 800) {
+          throw new BadRequestException('Не вдалося відправити SMS.');
+        }
+      } catch (error) {
+        throw new BadRequestException('Помилка відправки SMS.');
+      }
+    } else {
+      throw new BadRequestException('Помилка сервера: SMS не налаштовано');
+    }
+
+    return { success: true };
   }
 
   async verifyCode(phone: string, code: string, name?: string) {
@@ -58,7 +80,6 @@ async sendCode(phone: string) {
     return { success: true, user, token };
   }
 
-  // Метод для оновлення профілю юзера
   async updateProfile(userId: string, name: string) {
     const user = await this.prisma.user.update({
       where: { id: userId },
