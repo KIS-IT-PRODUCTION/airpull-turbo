@@ -49,14 +49,13 @@ export default function FavoritesList() {
             href={`/products/${product.slug || product.id}`} 
             className="flex flex-col h-full z-10"
           >
-            <div className="relative aspect-square w-full">
-              <Image
-                src={product.imageUrl || '/placeholder.jpg'}
-                alt={product.name}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </div>
+          <div className="relative aspect-square w-full overflow-hidden">
+            <img
+              src={product.imageUrl || '/placeholder.png'} 
+              alt={product.name}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          </div>
             
             <div className="p-4 flex flex-col flex-1 justify-between gap-3">
               <h3 className="text-white font-semibold text-sm line-clamp-2 group-hover:text-white/70 transition-colors">
