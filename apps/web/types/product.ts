@@ -15,6 +15,9 @@ export interface ProductSpec {
 }
 
 export interface Product {
+  slug?: string;
+  brand: any;
+  category: any;
   id: string;
   name: string;
   description?: string;
@@ -22,6 +25,9 @@ export interface Product {
   stock: number;
   imageUrl?: string;
   images?: ProductImage[];
+  ice: number;           
+  sweet: number;          
+  sour: number;
   specifications?: ProductSpec[];
   createdAt: string;
   updatedAt: string;

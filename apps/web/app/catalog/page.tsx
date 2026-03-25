@@ -30,7 +30,7 @@ export default async function CatalogPage() {
       '@type': 'ListItem',
       position: index + 1,
       name: product.name,
-      url: `https://airpull.com.ua/products/${product.id}`,
+      url: `https://airpull.com.ua/product/${product.slug || product.id}`,
     })),
   };
 

@@ -28,7 +28,6 @@ export async function getFeaturedProducts(limit = 4): Promise<Product[]> {
 }
 
 export const authApi = {
-  // Відправка коду
   sendCode: async (phone: string) => {
     const res = await fetch(`${API_URL}/auth/send-code`, {
       method: "POST",
@@ -40,13 +39,10 @@ export const authApi = {
       throw new Error("Помилка відправки коду. Спробуй ще раз.");
     }
     
-    // ЗМІНА ТУТ: Тепер ми реально читаємо відповідь від бекенду, 
-    // щоб фронтенд побачив { success: true, testCode: "1234" }
     const data = await res.json();
     return data; 
   },
 
-  // Перевірка коду та логін
   verifyCode: async (phone: string, code: string, name?: string) => {
     const res = await fetch(`${API_URL}/auth/verify-code`, {
       method: "POST",
@@ -64,6 +60,89 @@ export const authApi = {
       throw new Error(data.message || "Невірний код або він прострочений");
     }
 
-    return data; // Повертає { token: "..." }
+    return data;
   }
 };
+
+// --- ОНОВЛЕНА ФУНКЦІЯ ВИДАЛЕННЯ ---
+export async function deleteProduct(id: string, token?: string): Promise<boolean> {
+  try {
+    let finalToken: string | null | undefined = token;
+
+    // Спробуємо дістати токен (якщо він раптом не HttpOnly або є в localStorage)
+    if (!finalToken && typeof window !== 'undefined') {
+      const match = document.cookie.match(new RegExp('(^| )auth-token=([^;]+)'));
+      const cookieToken = match ? match[2] : null;
+      const localToken = localStorage.getItem('auth-token');
+      finalToken = cookieToken || localToken;
+    }
+
+    const headers: Record<string, string> = {};
+
+    // Якщо ми ЗМОГЛИ прочитати токен, додаємо його в заголовок Authorization
+    // Ми також перевіряємо, щоб це не був рядок "undefined" (який ламав бекенд)
+    if (finalToken && finalToken !== 'undefined' && finalToken !== 'null') {
+      finalToken = finalToken.replace(/^"|"$/g, '');
+      headers['Authorization'] = `Bearer ${finalToken}`;
+    }
+
+    // Відправляємо запит
+    const res = await fetch(`${API_URL}/products/${id}`, { 
+      method: 'DELETE',
+      headers,
+      credentials: 'include' // 🚀 МАГІЯ: браузер сам відправить HttpOnly куку на бекенд!
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      console.error("Помилка 401/403: Сервер відхилив токен при видаленні.");
+      alert('Помилка доступу: Ви не авторизовані або не маєте прав.');
+      return false;
+    }
+
+    return res.ok;
+  } catch (error) {
+    console.error('Помилка видалення:', error);
+    return false;
+  }
+}
+
+// --- ОНОВЛЕНА ФУНКЦІЯ СТАТУСУ ---
+export async function updateOrderStatus(orderId: string, status: string, token?: string): Promise<boolean> {
+  try {
+    let finalToken: string | null | undefined = token;
+
+    if (!finalToken && typeof window !== 'undefined') {
+      const match = document.cookie.match(new RegExp('(^| )auth-token=([^;]+)'));
+      const cookieToken = match ? match[2] : null;
+      const localToken = localStorage.getItem('auth-token');
+      finalToken = cookieToken || localToken;
+    }
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+
+    if (finalToken && finalToken !== 'undefined' && finalToken !== 'null') {
+      finalToken = finalToken.replace(/^"|"$/g, '');
+      headers['Authorization'] = `Bearer ${finalToken}`;
+    }
+
+    const res = await fetch(`${API_URL}/orders/${orderId}`, {
+      method: 'PATCH',
+      headers,
+      credentials: 'include', // 🚀 МАГІЯ ДЛЯ ОНОВЛЕННЯ СТАТУСУ
+      body: JSON.stringify({ status }),
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      console.error("Помилка прав доступу.");
+      alert('Помилка доступу: У вас немає прав адміністратора.');
+      return false;
+    }
+
+    return res.ok;
+  } catch (error) {
+    console.error('Помилка оновлення:', error);
+    return false;
+  }
+}

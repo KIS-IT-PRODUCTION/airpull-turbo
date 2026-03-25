@@ -66,6 +66,7 @@ export default function ProductGallery({ images, productName, inStock }: Product
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover transition-all duration-500 ease-in-out"
           priority
+          unoptimized={true}
         />
         
         <StockBadge inStock={inStock} />
@@ -114,6 +115,7 @@ export default function ProductGallery({ images, productName, inStock }: Product
                 fill
                 sizes="80px"
                 className="object-cover"
+                unoptimized={true}
               />
             </button>
           ))}

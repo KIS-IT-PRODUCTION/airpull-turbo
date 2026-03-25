@@ -1,3 +1,5 @@
+'use client';
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -9,7 +11,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
 
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-  // Показуємо максимум 5 сторінок
   const getVisiblePages = () => {
     if (totalPages <= 5) return pages;
     if (currentPage <= 3) return pages.slice(0, 5);
@@ -23,7 +24,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
 
   return (
     <nav aria-label="Пагінація каталогу" className="flex items-center justify-center gap-2 mt-12">
-      {/* Попередня */}
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
@@ -33,7 +33,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         ←
       </button>
 
-      {/* Перша сторінка якщо не видно */}
       {firstVisible > 1 && (
         <>
           <button
@@ -46,7 +45,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         </>
       )}
 
-      {/* Видимі сторінки */}
       {visible.map((page) => (
         <button
           key={page}
@@ -63,7 +61,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         </button>
       ))}
 
-      {/* Остання сторінка якщо не видно */}
       {lastVisible < totalPages && (
         <>
           {lastVisible < totalPages - 1 && (
@@ -78,7 +75,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         </>
       )}
 
-      {/* Наступна */}
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}

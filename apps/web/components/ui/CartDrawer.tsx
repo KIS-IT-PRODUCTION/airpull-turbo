@@ -1,15 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation'; // 👈 Додали імпорт роутера
 import { useCartStore, CartItem } from '../../app/store/cartStore';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, updateQuantity, removeItem, getTotalPrice } = useCartStore();
+  const router = useRouter(); // 👈 Ініціалізуємо роутер
   
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
 
   if (!isMounted) return null;
+
+  // 👈 Додали функцію для переходу на чекаут
+  const handleCheckoutClick = () => {
+    closeCart(); // Спочатку закриваємо дровер
+    router.push('/checkout'); // Переходимо на сторінку оформлення
+  };
 
   return (
     <>
@@ -46,10 +54,8 @@ export default function CartDrawer() {
               <p>Ваш кошик порожній</p>
             </div>
           ) : (
-            // 🚀 ОСЬ ТУТ ДОДАЛИ : CartItem
             items.map((item: CartItem) => (
               <div key={item.id} className="flex gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
-                {/* Заглушка для фото (можеш замінити на next/image) */}
                 <div className="w-20 h-20 bg-white/10 rounded-xl flex-shrink-0 flex items-center justify-center text-xs text-white/30">
                   {item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover rounded-xl" /> : 'Фото'}
                 </div>
@@ -83,7 +89,11 @@ export default function CartDrawer() {
               <span className="text-white/70 font-medium">Разом:</span>
               <span className="text-2xl font-bold text-white">{getTotalPrice()} ₴</span>
             </div>
-            <button className="w-full py-4 bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-500 hover:to-pink-500 text-white rounded-xl font-bold shadow-lg shadow-violet-500/25 transition-all active:scale-[0.98]">
+            {/* 👈 Додали onClick подію на кнопку */}
+            <button 
+              onClick={handleCheckoutClick}
+              className="w-full py-4 bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-500 hover:to-pink-500 text-white rounded-xl font-bold shadow-lg shadow-violet-500/25 transition-all active:scale-[0.98]"
+            >
               Оформити замовлення
             </button>
           </div>

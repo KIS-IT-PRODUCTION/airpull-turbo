@@ -11,7 +11,6 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService
   ) {
-    // Ініціалізуємо клієнт Twilio, якщо є ключі в .env
     if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
       this.twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
     }
@@ -22,11 +21,9 @@ export class AuthService {
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 5);
 
-    // Видаляємо старі коди і створюємо новий
     await this.prisma.otpCode.deleteMany({ where: { phone } });
     await this.prisma.otpCode.create({ data: { phone, code, expiresAt } });
 
-    // Відправляємо SMS через Twilio
     if (this.twilioClient && process.env.TWILIO_PHONE_NUMBER) {
       try {
         const message = await this.twilioClient.messages.create({

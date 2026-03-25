@@ -1,25 +1,39 @@
-import 'dotenv/config'; // Завантажуємо змінні середовища з .env файлу
+// backend/src/main.ts
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Дозволяємо нашому фронтенду робити сюди запити
-  app.enableCors();
+  // 2. ПІДКЛЮЧАЄМО КУКИ (до CORS)
+  app.use(cookieParser());
 
-  // Налаштовуємо магію Swagger
+  // 3. ПРАВИЛЬНИЙ CORS (тільки один раз!)
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true, // Дозволяє отримувати куки
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type,Authorization',
+  });
+
+  const uploadDir = join(process.cwd(), 'uploads');
+  app.useStaticAssets(uploadDir, {
+    prefix: '/uploads/',
+  });
+
   const config = new DocumentBuilder()
     .setTitle('Airpull API')
-    .setDescription('Документація та панель керування для Airpull Vape Shop')
+    .setDescription('Документація')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  // ЗМІНА ТУТ:
-  // Якщо є порт від Render - беремо його, якщо ні (локально) - беремо 4004
   await app.listen(process.env.PORT || 4004);
 }
 bootstrap();

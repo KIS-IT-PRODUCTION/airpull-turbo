@@ -13,7 +13,6 @@ class VerifyCodeDto {
   phone: string;
   @ApiProperty({ example: '1234' })
   code: string;
-  // 🚀 ДОДАЄМО ПОЛЕ name
   @ApiProperty({ example: 'Влад', required: false })
   name?: string; 
 }

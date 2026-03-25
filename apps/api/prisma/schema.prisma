@@ -7,18 +7,24 @@ datasource db {
 }
 
 model Product {
-  id              String           @id @default(uuid())
-  name            String
-  slug            String           @unique
-  description     String?
-  price           Float
-  stock           Int
-  imageUrl        String?
-  images          ProductImage[]
-  specifications  ProductSpec[]
-  orderItems      OrderItem[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id             String         @id @default(uuid())
+  name           String
+  slug           String         @unique
+  description    String?
+  price          Float
+  stock          Int
+  category       String?        
+  brand          String?        
+  imageUrl       String?
+  imageAlt       String?        
+  images         ProductImage[]
+  ice            Int?           
+  sweet          Int?           
+  sour           Int?
+  specifications ProductSpec[]
+  orderItems     OrderItem[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
 model ProductImage {
@@ -42,41 +48,40 @@ model ProductSpec {
 
 model User {
   id        String   @id @default(uuid())
-  phone     String   @unique             // Номер телефону має бути унікальним
-  name      String?                      // Ім'я може бути пустим при реєстрації
-  role      Role     @default(USER)      // Роль, щоб потім зробити адмінку
+  phone     String   @unique              
+  name      String?                      
+  role      Role     @default(USER)      
   orders    Order[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// Перелік ролей
 enum Role {
   USER
   ADMIN
 }
 
-// Таблиця для зберігання кодів підтвердження (OTP)
 model OtpCode {
   id        String   @id @default(uuid())
-  phone     String   // Номер, на який відправили код
-  code      String   // Сам код (наприклад, "4815")
-  expiresAt DateTime // Час, коли код "згорить" (наприклад, через 5 хвилин)
+  phone     String   
+  code      String   
+  expiresAt DateTime 
   
   createdAt DateTime @default(now())
 
-  // Індекс для швидкого пошуку по номеру
   @@index([phone])
 }
 
 model Order {
-  id        String      @id @default(uuid())
-  userId    String
-  user      User        @relation(fields: [userId], references: [id])
-  status    String      @default("PENDING") // PENDING, PROCESSING, COMPLETED, CANCELLED
-  total     Float       // Загальна сума замовлення
-  items     OrderItem[]
-  createdAt DateTime    @default(now())
+  id                String      @id @default(uuid())
+  userId            String
+  user              User        @relation(fields: [userId], references: [id])
+  status            String      @default("PENDING") 
+  total             Float       
+  deliveryCity      String?
+  deliveryWarehouse String?
+  items             OrderItem[]
+  createdAt         DateTime    @default(now())
 }
 
 model OrderItem {
@@ -85,6 +90,6 @@ model OrderItem {
   order     Order   @relation(fields: [orderId], references: [id])
   productId String
   product   Product @relation(fields: [productId], references: [id])
-  quantity  Int     // Кількість
-  price     Float   // Ціна за 1 шт НА МОМЕНТ ПОКУПКИ (це важливо зберегти!)
+  quantity  Int     
+  price     Float   
 }

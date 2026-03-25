@@ -82,3 +82,33 @@ export async function updateProfileData(name: string) {
     return { error: error.message || 'Сталася помилка під час оновлення профілю' };
   }
 }
+
+export async function getProfileRequest(token?: string) {
+  let authToken = token;
+
+  // Якщо токен не передали в аргументах, беремо його з кук на сервері
+  if (!authToken) {
+    const cookieStore = await cookies();
+    authToken = cookieStore.get('auth-token')?.value;
+  }
+
+  // Якщо токена немає ні в аргументах, ні в куках — повертаємо null
+  if (!authToken) return null;
+
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4004";
+    const response = await fetch(`${API_URL}/auth/profile`, {
+      headers: {
+        'Authorization': `Bearer ${authToken}`
+      },
+      cache: 'no-store'
+    });
+
+    if (!response.ok) return null;
+
+    return response.json();
+  } catch (error) {
+    console.error('Profile fetch error:', error);
+    return null;
+  }
+}

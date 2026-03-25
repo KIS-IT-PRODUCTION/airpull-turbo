@@ -2,12 +2,18 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**', // дозволяє будь-який хост
+        protocol: 'http', // 🚀 Змінено для локального NestJS
+        hostname: 'localhost',
+        port: '4004', // Вказуємо порт вашого бекенду
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https', // Залишаємо для майбутнього бойового сервера
+        hostname: '**',
+        pathname: '/uploads/**',
       },
     ],
   },
-  // Додаємо ці два блоки для швидкого деплою на Vercel:
   eslint: {
     ignoreDuringBuilds: true,
   },
