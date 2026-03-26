@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation';
 import ProductForm from '@/components/admin/ProductForm';
-import { getProductById } from '@/lib/api'; // Вкажи свій шлях
+import { getProductById } from '@/lib/api';
+import { cookies } from 'next/headers';
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth-token')?.value || cookieStore.get('token')?.value;
   const product = await getProductById(id); 
 
   if (!product) {
@@ -20,7 +22,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
         </span>
       </div>
       
-      <ProductForm initialData={product} />
+      <ProductForm initialData={product} token={token} />
     </div>
   );
 }

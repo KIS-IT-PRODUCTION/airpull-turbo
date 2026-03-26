@@ -14,6 +14,7 @@ interface ProductImage {
 }
 
 const CATEGORIES_DATA = [
+  // ... твої категорії залишаються без змін ...
   {
     id: 'liquid',
     label: 'Рідини',
@@ -57,7 +58,8 @@ const CATEGORIES_DATA = [
   },
 ];
 
-export default function ProductForm({ initialData }: { initialData?: any }) {
+// 🚀 1. ДОДАЛИ token В ПРОПСИ
+export default function ProductForm({ initialData, token }: { initialData?: any, token?: string }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingState, setUploadingState] = useState<{ [key: string]: boolean }>({});
@@ -119,11 +121,16 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
     const uploadData = new FormData();
     uploadData.append('file', file);
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004';
+    
+    // 🚀 2. ДОДАЛИ ТОКЕН ПРИ ЗАВАНТАЖЕННІ ФОТО
     const res = await fetch(`${API_URL}/upload/single`, {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}` 
+      },
       body: uploadData,
-      credentials: 'include', 
     });
+    
     if (!res.ok) throw new Error('Upload failed');
     const data = await res.json();
     return data.url; 
@@ -137,7 +144,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
       const url = await uploadFile(file);
       setFormData(prev => ({ ...prev, imageUrl: url }));
     } catch (err) {
-      alert('Помилка завантаження');
+      alert('Помилка завантаження фотографії. Перевірте авторизацію.');
     } finally {
       setUploadingState(prev => ({ ...prev, main: false }));
     }
@@ -191,10 +198,13 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
     };
 
     try {
+      // 🚀 3. ДОДАЛИ ТОКЕН ПРИ СТВОРЕННІ/ОНОВЛЕННІ ТОВАРУ
       const res = await fetch(isEditing ? `${API_URL}/products/${productId}` : `${API_URL}/products`, {
         method: isEditing ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(payload),
       });
 
