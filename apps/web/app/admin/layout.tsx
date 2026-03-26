@@ -2,12 +2,11 @@ import Sidebar from '@/components/admin/Sidebar';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
-
+export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Admin Panel | Управління магазином',
 };
 
-// 🔴 Додаємо функцію для отримання кількості нових замовлень
 async function getPendingOrdersCount(token: string) {
   try {
     const res = await fetch('http://localhost:4004/orders', {
@@ -39,12 +38,10 @@ export default async function AdminLayout({
   const cookieStore = await cookies();
   const token = cookieStore.get('auth-token')?.value;
 
-  // 1. Перевіряємо, чи є токен
   if (!token) {
     redirect('/login');
   }
 
-  // 2. Перевіряємо права доступу (твій існуючий код)
   try {
     const decoded: any = jwtDecode(token);
     console.log('--- DEBUG ADMIN CHECK ---');
@@ -60,8 +57,6 @@ export default async function AdminLayout({
     redirect('/login');
   }
 
-  // 3. Отримуємо кількість замовлень ПІСЛЯ перевірки прав
-  // Передаємо токен, щоб бекенд пустив нас до даних
   const pendingOrdersCount = await getPendingOrdersCount(token);
 
   return (

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { getProducts } from '@/lib/api';
 import CatalogClient from '@/components/catalog/CatalogClient';
 
@@ -62,8 +63,10 @@ export default async function CatalogPage() {
             </p>
           </header>
 
-          {/* Каталог з фільтрами */}
-          <CatalogClient products={products} />
+          <Suspense fallback={<div className="text-white/50 text-center py-10 animate-pulse">Завантаження каталогу...</div>}>
+            <CatalogClient products={products} />
+          </Suspense>
+          
         </div>
       </main>
     </>

@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import PromotionsClient from './PromotionsClient';
-
+export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Акції та Знижки | Admin Panel',
 };

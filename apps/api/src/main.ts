@@ -10,12 +10,16 @@ import cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // 2. ПІДКЛЮЧАЄМО КУКИ (до CORS)
   app.use(cookieParser());
 
-  // 3. ПРАВИЛЬНИЙ CORS (тільки один раз!)
+  const allowedOrigins = ['http://localhost:3000'];
+  
+  if (process.env.FRONTEND_URL) {
+    allowedOrigins.push(process.env.FRONTEND_URL);
+  }
+
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: allowedOrigins,
     credentials: true, // Дозволяє отримувати куки
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
@@ -34,6 +38,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(process.env.PORT || 4004);
+  const port = process.env.PORT || 4004;
+  await app.listen(port);
+  console.log(`🚀 БЕКЕНД ПРАЦЮЄ НА ПОРТУ ${port}`);
 }
 bootstrap();

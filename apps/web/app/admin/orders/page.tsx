@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers';
 import OrdersTableClient from './OrdersTableClient';
 
-// Твої інтерфейси залишаємо тут, щоб типізувати відповідь від fetch
 interface UserInfo {
   id: string;
   name: string | null;
@@ -32,6 +31,7 @@ interface Order {
   user?: UserInfo;
   items: OrderItemInfo[];
 }
+export const dynamic = 'force-dynamic';
 
 async function getOrders(): Promise<Order[]> {
   try {
@@ -59,7 +59,6 @@ async function getOrders(): Promise<Order[]> {
 }
 
 export default async function AdminOrdersPage() {
-  // Отримуємо всі замовлення на сервері
   const orders = await getOrders();
 
   return (
@@ -68,7 +67,6 @@ export default async function AdminOrdersPage() {
         <h1 className="text-3xl font-bold text-white">Замовлення</h1>
       </div>
 
-      {/* Передаємо їх у клієнтський компонент, який буде їх фільтрувати */}
       <OrdersTableClient initialOrders={orders} />
     </div>
   );

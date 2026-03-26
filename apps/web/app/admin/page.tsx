@@ -1,7 +1,6 @@
 import DashboardClient from '@/components/admin/DashboardClient';
-import { DashboardData } from '@/types/dashboard'; // Шлях до файлу з типами, якщо ти його створив
+import { DashboardData } from '@/types/dashboard';
 
-// Вказуємо Next.js не кешувати цю сторінку, щоб дані завжди були свіжими
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboardPage() {
