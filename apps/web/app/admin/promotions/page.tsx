@@ -26,7 +26,7 @@ async function getPromotions(token: string) {
 // Функція завантаження всіх товарів
 async function getAllProducts(token: string) {
   try {
-    const res = await fetch('http://localhost:4004/products', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
       headers: { 'Authorization': `Bearer ${token}` },
       cache: 'no-store'
     });

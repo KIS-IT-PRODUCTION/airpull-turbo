@@ -8,7 +8,7 @@ async function getOrder(id: string) {
     const cookieStore = await cookies();
     const token = cookieStore.get('auth-token')?.value;
 
-    const res = await fetch(`http://localhost:4004/orders/${id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/${id}`, {
       cache: 'no-store',
       headers: {
         'Authorization': `Bearer ${token}`,

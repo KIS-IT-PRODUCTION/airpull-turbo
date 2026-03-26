@@ -47,7 +47,7 @@ export default function PromotionsClient({
   const togglePromotion = async (id: string, currentStatus: boolean) => {
     setIsLoading(id);
     try {
-      const res = await fetch(`http://localhost:4004/admin/promotions/${id}/toggle`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/promotions/${id}/toggle`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -69,7 +69,7 @@ export default function PromotionsClient({
   const deletePromotion = async (id: string) => {
     if (!confirm('Видалити цю акцію? Всі ціни повернуться до норми.')) return;
     try {
-      const res = await fetch(`http://localhost:4004/admin/promotions/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/promotions/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });

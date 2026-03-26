@@ -61,7 +61,7 @@ export default function CreatePromotionPage() {
     const fetchProducts = async () => {
       const token = getCookie('auth-token');
       try {
-        const res = await fetch('http://localhost:4004/products', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -88,7 +88,7 @@ export default function CreatePromotionPage() {
     const token = getCookie('auth-token');
 
     try {
-      const res = await fetch('http://localhost:4004/admin/promotions', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/promotions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

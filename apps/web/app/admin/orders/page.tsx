@@ -38,7 +38,7 @@ async function getOrders(): Promise<Order[]> {
     const cookieStore = await cookies(); 
     const token = cookieStore.get('auth-token')?.value;
 
-    const res = await fetch('http://localhost:4004/orders', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders`, {
       cache: 'no-store',
       headers: {
         'Authorization': `Bearer ${token}`, 
