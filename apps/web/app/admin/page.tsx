@@ -1,25 +1,38 @@
-export default function AdminDashboard() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Огляд (Дашборд)</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Картки статистики (поки статичні) */}
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6">
-          <p className="text-white/60 text-sm mb-2">Нових замовлень</p>
-          <p className="text-3xl font-bold text-violet-400">12</p>
-        </div>
-        
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6">
-          <p className="text-white/60 text-sm mb-2">Прибуток за місяць</p>
-          <p className="text-3xl font-bold text-green-400">45,200 ₴</p>
-        </div>
-        
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6">
-          <p className="text-white/60 text-sm mb-2">Всього товарів</p>
-          <p className="text-3xl font-bold text-white">128</p>
-        </div>
+import DashboardClient from '@/components/admin/DashboardClient';
+import { DashboardData } from '@/types/dashboard'; // Шлях до файлу з типами, якщо ти його створив
+
+// Вказуємо Next.js не кешувати цю сторінку, щоб дані завжди були свіжими
+export const dynamic = 'force-dynamic';
+
+export default async function AdminDashboardPage() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/dashboard-stats`, {
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error('Не вдалося отримати дані з бекенду');
+    }
+
+    const data: DashboardData = await res.json();
+
+    return (
+      <DashboardClient 
+        metrics={data.metrics} 
+        chartData={data.chartData} 
+      />
+    );
+  } catch (error) {
+    console.error('Помилка завантаження дашборду:', error);
+    
+    return (
+      <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400">
+        <h2 className="text-xl font-bold mb-2">Помилка мережі</h2>
+        <p>Не вдалося завантажити статистику. Перевірте підключення до бекенду.</p>
       </div>
-    </div>
-  );
+    );
+  }
 }

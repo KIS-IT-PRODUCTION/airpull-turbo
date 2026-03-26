@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getUser, updateProfileData } from '@/app/actions/auth';
+import { getUser, updateProfileData } from '@/lib/auth';
 import { UserData } from '@/types/auth';
 
 export default function ProfilePage() {

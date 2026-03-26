@@ -3,13 +3,19 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export default function Sidebar() {
+// Додаємо опис пропсів
+interface SidebarProps {
+  pendingOrdersCount?: number;
+}
+
+export default function Sidebar({ pendingOrdersCount = 0 }: SidebarProps) {
   const pathname = usePathname();
 
   const menuItems = [
     { name: 'Дашборд', path: '/admin', icon: '📊' },
     { name: 'Замовлення', path: '/admin/orders', icon: '📦' },
     { name: 'Товари', path: '/admin/products', icon: '🛍️' },
+    { name: 'Акції', path: '/admin/promotions', icon: '🏷️' }, // Додай цей рядок
     { name: 'Налаштування', path: '/admin/settings', icon: '⚙️' },
   ];
 
@@ -34,7 +40,13 @@ export default function Sidebar() {
               }`}
             >
               <span>{item.icon}</span>
-              <span>{item.name}</span>
+              <span className="flex-1">{item.name}</span>
+              
+              {item.path === '/admin/orders' && pendingOrdersCount > 0 && (
+                <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-bold text-white bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-pulse">
+                  {pendingOrdersCount}
+                </span>
+              )}
             </Link>
           );
         })}

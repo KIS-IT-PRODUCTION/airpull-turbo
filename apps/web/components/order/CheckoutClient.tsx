@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useCartStore } from '@/app/store/cartStore';
-import { getUser } from '@/app/actions/auth';
-import { createOrderRequest } from '@/app/actions/orders';
+import { getUser } from '@/lib/auth';
+import { createOrderRequest } from '@/lib/orders';
 import NovaPoshtaForm from './NovaPoshtaForm'; // Імпортуємо наш новий компонент
 
 export default function CheckoutClient() {

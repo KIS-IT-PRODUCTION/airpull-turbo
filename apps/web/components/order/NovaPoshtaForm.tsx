@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { searchCities, getCityWarehouses, type NPCity, type NPWarehouse } from '@/app/actions/novaposhta';
+import { searchCities, getCityWarehouses, type NPCity, type NPWarehouse } from '@/lib/novaposhta';
 
 interface NovaPoshtaFormProps {
   onCitySelect: (cityName: string) => void;

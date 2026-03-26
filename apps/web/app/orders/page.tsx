@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getUserOrdersRequest } from '@/app/actions/orders';
+import { getUserOrdersRequest } from '@/lib/orders';
 
 // 💡 Орієнтовні типи для замовлення. Можливо, твій бекенд віддає трохи інші назви полів (наприклад, не createdAt, а date)
 interface OrderItem {

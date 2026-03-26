@@ -6,9 +6,11 @@ import { ProductsModule } from './products/products.module';
 import { AuthModule } from './auth/auth.module';
 import { OrdersModule } from './orders/orders.module';
 import { UploadController } from './upload/upload.controller'
+import { DashboardModule } from './dashboard/dashboard.module';
+import { PromotionsModule } from './promotions/promotions.module';
 
 @Module({
-  imports: [PrismaModule, ProductsModule, AuthModule, OrdersModule],
+  imports: [PrismaModule, ProductsModule, AuthModule, OrdersModule, DashboardModule, PromotionsModule],
   controllers: [AppController, UploadController],
   providers: [AppService],
 })

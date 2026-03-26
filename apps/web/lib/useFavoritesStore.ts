@@ -1,20 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-export interface FavoriteItem {
-  id: string;
-  name: string;
-  price: number;
-  imageUrl?: string;
-  slug?: string;
-  stock: number;
-}
-
-interface FavoritesStore {
-  items: FavoriteItem[];
-  toggleFavorite: (item: FavoriteItem) => void;
-  isFavorite: (id: string) => boolean;
-}
+import { FavoriteItem, FavoritesStore } from '@/types/favorites'
 
 export const useFavoritesStore = create<FavoritesStore>()(
   persist(

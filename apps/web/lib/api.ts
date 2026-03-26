@@ -1,6 +1,6 @@
 import type { Product } from '@/types/product';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://airpull-api.onrender.com';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function getProducts(): Promise<Product[]> {
   try {
@@ -64,12 +64,10 @@ export const authApi = {
   }
 };
 
-// --- ОНОВЛЕНА ФУНКЦІЯ ВИДАЛЕННЯ ---
 export async function deleteProduct(id: string, token?: string): Promise<boolean> {
   try {
     let finalToken: string | null | undefined = token;
 
-    // Спробуємо дістати токен (якщо він раптом не HttpOnly або є в localStorage)
     if (!finalToken && typeof window !== 'undefined') {
       const match = document.cookie.match(new RegExp('(^| )auth-token=([^;]+)'));
       const cookieToken = match ? match[2] : null;
@@ -79,18 +77,15 @@ export async function deleteProduct(id: string, token?: string): Promise<boolean
 
     const headers: Record<string, string> = {};
 
-    // Якщо ми ЗМОГЛИ прочитати токен, додаємо його в заголовок Authorization
-    // Ми також перевіряємо, щоб це не був рядок "undefined" (який ламав бекенд)
     if (finalToken && finalToken !== 'undefined' && finalToken !== 'null') {
       finalToken = finalToken.replace(/^"|"$/g, '');
       headers['Authorization'] = `Bearer ${finalToken}`;
     }
 
-    // Відправляємо запит
     const res = await fetch(`${API_URL}/products/${id}`, { 
       method: 'DELETE',
       headers,
-      credentials: 'include' // 🚀 МАГІЯ: браузер сам відправить HttpOnly куку на бекенд!
+      credentials: 'include'
     });
 
     if (res.status === 401 || res.status === 403) {
@@ -106,7 +101,6 @@ export async function deleteProduct(id: string, token?: string): Promise<boolean
   }
 }
 
-// --- ОНОВЛЕНА ФУНКЦІЯ СТАТУСУ ---
 export async function updateOrderStatus(orderId: string, status: string, token?: string): Promise<boolean> {
   try {
     let finalToken: string | null | undefined = token;

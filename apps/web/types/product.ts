@@ -15,6 +15,7 @@ export interface ProductSpec {
 }
 
 export interface Product {
+  oldPrice: boolean;
   slug?: string;
   brand: any;
   category: any;

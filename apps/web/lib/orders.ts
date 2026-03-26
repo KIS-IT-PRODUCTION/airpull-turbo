@@ -2,10 +2,8 @@
 
 import { cookies } from 'next/headers';
 
-// Виправлено: Беремо URL з .env, а якщо його немає — ставимо робочий бекенд
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'https://airpull-api.onrender.com';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// 1. Створення замовлення
 export async function createOrderRequest(orderData: any) {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth-token')?.value;
@@ -32,7 +30,6 @@ export async function createOrderRequest(orderData: any) {
   return response.json();
 }
 
-// 2. Отримання історії замовлень
 export async function getUserOrdersRequest() {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth-token')?.value;

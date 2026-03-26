@@ -1,14 +1,5 @@
 'use server';
-
-export interface NPCity {
-  Present: string;
-  DeliveryCity: string;
-}
-
-export interface NPWarehouse {
-  Description: string;
-  Ref: string;
-}
+import { NPCity, NPWarehouse } from '@/types/novaposhta'
 
 const NP_API_KEY = process.env.NP_API_KEY; 
 

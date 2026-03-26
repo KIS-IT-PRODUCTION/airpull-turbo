@@ -12,7 +12,7 @@ export async function setAuthCookie(token: string) {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 днів
+    maxAge: 60 * 60 * 24 * 7,
   });
 }
 
@@ -48,7 +48,6 @@ export async function getUser() {
   }
 }
 
-// Функція для оновлення імені профілю
 export async function updateProfileData(name: string) {
   const user = await getUser();
   if (!user) {
@@ -86,13 +85,11 @@ export async function updateProfileData(name: string) {
 export async function getProfileRequest(token?: string) {
   let authToken = token;
 
-  // Якщо токен не передали в аргументах, беремо його з кук на сервері
   if (!authToken) {
     const cookieStore = await cookies();
     authToken = cookieStore.get('auth-token')?.value;
   }
 
-  // Якщо токена немає ні в аргументах, ні в куках — повертаємо null
   if (!authToken) return null;
 
   try {

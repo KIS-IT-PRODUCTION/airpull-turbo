@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { getUser, removeAuthCookie } from '@/app/actions/auth';
-import { getSearchResults } from '@/app/actions/products';
+import { getUser, removeAuthCookie } from '@/lib/auth';
+import { getSearchResults } from '@/lib/products';
 import CartButton from '@/components/ui/CartButton';
 import { useFavoritesStore } from '@/lib/useFavoritesStore';
 

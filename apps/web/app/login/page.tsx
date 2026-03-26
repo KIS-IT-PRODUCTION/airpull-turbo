@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { setAuthCookie } from "../actions/auth";
+import toast from "react-hot-toast";
+import { setAuthCookie } from "../../lib/auth";
 import { authApi } from "@/lib/api";
 
 export default function LoginPage() {
@@ -21,10 +22,43 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await authApi.sendCode(phone);
-      setStep(2);
-    } catch (err: any) {
-      setError(err.message || "Сталася помилка");
+      const res = await fetch('http://localhost:4004/auth/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+
+      const data = await res.json();
+
+      if (data.message === 'TELEGRAM_NOT_LINKED') {
+        toast.error(
+          <div className="flex flex-col gap-2">
+            <span className="font-bold">Бот не знає ваш номер!</span>
+            <span className="text-xs opacity-80">Щоб отримати код, запустіть нашого бота:</span>
+            <a 
+              href="https://t.me/AirPullBot"
+              target="_blank" 
+              rel="noreferrer"
+              className="mt-1 px-4 py-2 bg-blue-500 text-white text-center text-xs font-bold rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Відкрити Telegram
+            </a>
+          </div>,
+          { duration: 6000 }
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      if (res.ok) {
+        setStep(2);
+        toast.success('Код відправлено в Telegram!');
+      } else {
+        setError(data.message || 'Помилка відправки коду');
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Сталася помилка з'єднання з сервером");
     } finally {
       setIsLoading(false);
     }
@@ -42,10 +76,11 @@ export default function LoginPage() {
         await setAuthCookie(data.token);
       }
       
+      toast.success('Успішний вхід!');
       router.push("/"); 
       
     } catch (err: any) {
-      setError(err.message || "Сталася помилка");
+      setError(err.message || "Сталася помилка. Перевірте код.");
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +110,7 @@ export default function LoginPage() {
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-2xl">
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center font-medium">
               {error}
             </div>
           )}
@@ -111,7 +146,7 @@ export default function LoginPage() {
               
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || phone.length < 10}
                 className="w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-violet-500 to-pink-500 hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-violet-500/20"
               >
                 {isLoading ? "Відправка..." : "Отримати код →"}
@@ -123,7 +158,7 @@ export default function LoginPage() {
             <form onSubmit={handleVerifyCode} className="space-y-6">
               <div>
                 <label className="block text-violet-400 font-semibold text-xs uppercase tracking-widest mb-2 text-center">
-                  Код з SMS
+                  Код з Telegram
                 </label>
                 <input
                   type="text"
@@ -149,7 +184,11 @@ export default function LoginPage() {
                 
                 <button
                   type="button"
-                  onClick={() => setStep(1)}
+                  onClick={() => {
+                    setStep(1);
+                    setCode("");
+                    setError("");
+                  }}
                   className="w-full py-3 text-sm text-white/50 hover:text-white transition-colors"
                 >
                   ← Назад до вводу даних

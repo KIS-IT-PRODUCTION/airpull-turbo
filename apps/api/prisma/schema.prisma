@@ -12,6 +12,7 @@ model Product {
   slug           String         @unique
   description    String?
   price          Float
+  oldPrice       Float?         // Стара ціна (заповнюється автоматично бекендом під час акції)
   stock          Int
   category       String?        
   brand          String?        
@@ -46,11 +47,34 @@ model ProductSpec {
   productId String
 }
 
+enum DiscountType {
+  PERCENTAGE // Відсоток (наприклад, 20%)
+  FIXED      // Фіксована сума (наприклад, відняти 500 грн)
+}
+
+model Promotion {
+  id           String       @id @default(uuid())
+  name         String       // Назва (наприклад, "Чорна п'ятниця")
+  discountType DiscountType 
+  value        Float        // Розмір (20 для 20%, або 500 для 500 грн)
+  
+  // УМОВИ (Таргетинг знижки)
+  applyToAll   Boolean      @default(false) // Якщо true - діє на всі товари
+  categories   String[]     // Масив категорій ["Laptops", "Phones"]
+  productIds   String[]     // Масив ID конкретних товарів
+  
+  isActive     Boolean      @default(false) // Чи включена знижка зараз
+  
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
 model User {
   id        String   @id @default(uuid())
   phone     String   @unique              
   name      String?                      
-  role      Role     @default(USER)      
+  role      Role     @default(USER)   
+  telegramChatId String?   @unique   
   orders    Order[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

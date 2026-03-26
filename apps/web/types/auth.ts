@@ -1,5 +1,3 @@
-// types/auth.ts
-
 export interface UserData {
   sub: string;
   phone: string;
@@ -10,5 +8,5 @@ export interface UserData {
 export interface VerifyCodeResponse {
   token?: string;
   message?: string;
-  user?: UserData; // Якщо бекенд повертає юзера разом з токеном
+  user?: UserData;
 }
