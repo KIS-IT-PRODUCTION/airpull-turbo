@@ -10,7 +10,7 @@ export const metadata = {
 // Функція завантаження акцій
 async function getPromotions(token: string) {
   try {
-    const res = await fetch('http://localhost:4004/admin/promotions', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/promotions`, {
       headers: { 'Authorization': `Bearer ${token}` },
       cache: 'no-store'
     });
