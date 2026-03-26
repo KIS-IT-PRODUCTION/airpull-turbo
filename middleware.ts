@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { jwtDecode } from 'jwt-decode'; 
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
+  const token = request.cookies.get('token')?.value || request.cookies.get('auth-token')?.value;
   
   const { pathname } = request.nextUrl;
 

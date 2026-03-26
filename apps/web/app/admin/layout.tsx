@@ -2,6 +2,7 @@ import Sidebar from '@/components/admin/Sidebar';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
+
 export const dynamic = 'force-dynamic';
 export const metadata = {
   title: 'Admin Panel | Управління магазином',
@@ -9,8 +10,10 @@ export const metadata = {
 
 async function getPendingOrdersCount(token: string) {
   try {
-    const res = await fetch('http://localhost:4004/orders', {
-      cache: 'no-store', // щоб дані завжди були свіжі
+    // 🚀 ВИПРАВЛЕНО: Використовуємо змінну Vercel замість localhost
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const res = await fetch(`${API_URL}/orders`, {
+      cache: 'no-store',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -20,10 +23,7 @@ async function getPendingOrdersCount(token: string) {
     if (!res.ok) return 0;
 
     const orders = await res.json();
-    // Рахуємо тільки ті, що мають статус "Очікує" (PENDING)
-    const pendingCount = orders.filter((order: any) => order.status === 'PENDING').length;
-    
-    return pendingCount;
+    return orders.filter((order: any) => order.status === 'PENDING').length;
   } catch (error) {
     console.error('Помилка завантаження індикатора замовлень:', error);
     return 0;
@@ -36,7 +36,9 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth-token')?.value;
+  
+  // 🚀 УНІФІКАЦІЯ: Той самий пошук, що і в middleware
+  const token = cookieStore.get('token')?.value || cookieStore.get('auth-token')?.value;
 
   if (!token) {
     redirect('/login');
@@ -44,12 +46,8 @@ export default async function AdminLayout({
 
   try {
     const decoded: any = jwtDecode(token);
-    console.log('--- DEBUG ADMIN CHECK ---');
-    console.log('Decoded Token:', decoded);
-    console.log('Role found:', decoded.role);
     
     if (decoded.role !== 'ADMIN' && decoded.role !== 'admin') {
-      console.log('Access Denied: Role mismatch');
       redirect('/');
     }
   } catch (error) {
@@ -61,7 +59,6 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-[#0a0a0a] text-white">
-      {/* 4. Передаємо пропс у Sidebar */}
       <Sidebar pendingOrdersCount={pendingOrdersCount} />
       <main className="flex-1 p-8 overflow-y-auto">
         {children}
