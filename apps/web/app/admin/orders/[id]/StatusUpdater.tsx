@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateOrderStatus } from '@/lib/api';
 
 interface StatusUpdaterProps {
   orderId: string;
   initialStatus: string;
+  token?: string; // Приймаємо токен
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -17,7 +17,7 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: 'text-red-400 bg-red-400/10 border-red-400/20',
 };
 
-export default function StatusUpdater({ orderId, initialStatus }: StatusUpdaterProps) {
+export default function StatusUpdater({ orderId, initialStatus, token }: StatusUpdaterProps) {
   const [status, setStatus] = useState(initialStatus);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -25,16 +25,32 @@ export default function StatusUpdater({ orderId, initialStatus }: StatusUpdaterP
   const handleUpdate = async () => {
     setIsLoading(true);
     
-    const isSuccess = await updateOrderStatus(orderId, status);
+    try {
+      // Робимо прямий запит, щоб гарантовано передати токен
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // 🚀 ТОКЕН ТЕПЕР ТУТ
+        },
+        body: JSON.stringify({ status }), // Відправляємо обраний у селекті статус
+      });
 
-    if (isSuccess) {
-      alert('Статус оновлено ✅');
-      router.refresh(); 
-    } else {
-      alert('Помилка оновлення. Можливо, ви не авторизовані як адмін або сервер недоступний.');
+      if (res.ok) {
+        alert('Статус оновлено ✅');
+        router.refresh(); 
+      } else {
+        alert('Помилка оновлення. Можливо, ви не авторизовані як адмін або сервер недоступний.');
+        // Якщо помилка, повертаємо селект до початкового стану
+        setStatus(initialStatus); 
+      }
+    } catch (error) {
+      console.error('Помилка:', error);
+      alert('Помилка мережі при оновленні статусу.');
+      setStatus(initialStatus);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (

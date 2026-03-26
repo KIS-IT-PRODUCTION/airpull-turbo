@@ -3,11 +3,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import StatusUpdater from './StatusUpdater'; // Імпортуємо клієнтський компонент
 
+// Залишаємо getOrder як є, вона працює правильно
 async function getOrder(id: string) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token')?.value;
-
+    const token = cookieStore.get('auth-token')?.value || cookieStore.get('token')?.value; // Додав перевірку і на 'token' про всяк випадок
+    
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/${id}`, {
       cache: 'no-store',
       headers: {
@@ -24,9 +25,12 @@ async function getOrder(id: string) {
 }
 
 export default async function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  // У нових версіях Next.js params потрібно розпаковувати через await
   const { id } = await params;
   const order = await getOrder(id);
+
+  // 🚀 ДОДАЄМО ВИКЛИК cookies() ТУТ
+  // Ми повинні дістати cookies в самому компоненті, щоб мати до них доступ нижче
+  const cookieStore = await cookies();
 
   if (!order) {
     notFound();
@@ -123,8 +127,12 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
             </div>
           </div>
 
-          {/* Статус замовлення - ТЕПЕР РОБОЧИЙ */}
-          <StatusUpdater orderId={order.id} initialStatus={order.status} />
+         {/* 🚀 ТЕПЕР cookieStore ДОСТУПНИЙ ТУТ */}
+        <StatusUpdater 
+          orderId={order.id} 
+          initialStatus={order.status} 
+          token={cookieStore.get('token')?.value || cookieStore.get('auth-token')?.value} 
+        />
         </div>
       </div>
     </div>
