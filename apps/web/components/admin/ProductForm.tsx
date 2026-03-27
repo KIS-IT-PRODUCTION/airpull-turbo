@@ -14,7 +14,6 @@ interface ProductImage {
 }
 
 const CATEGORIES_DATA = [
-  // ... твої категорії залишаються без змін ...
   {
     id: 'liquid',
     label: 'Рідини',
@@ -58,7 +57,6 @@ const CATEGORIES_DATA = [
   },
 ];
 
-// 🚀 1. ДОДАЛИ token В ПРОПСИ
 export default function ProductForm({ initialData, token }: { initialData?: any, token?: string }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,6 +79,9 @@ export default function ProductForm({ initialData, token }: { initialData?: any,
   });
 
   const availableBrands = CATEGORIES_DATA.find(c => c.id === formData.category)?.brands || [];
+  
+  // 🚀 Перевірка, чи обрана категорія - рідина
+  const isLiquid = formData.category === 'liquid';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -122,7 +123,6 @@ export default function ProductForm({ initialData, token }: { initialData?: any,
     uploadData.append('file', file);
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
     
-    // 🚀 2. ДОДАЛИ ТОКЕН ПРИ ЗАВАНТАЖЕННІ ФОТО
     const res = await fetch(`${API_URL}/upload/single`, {
       method: 'POST',
       headers: {
@@ -188,17 +188,22 @@ export default function ProductForm({ initialData, token }: { initialData?: any,
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-');
 
+    // 🚀 Формуємо payload. Якщо це НЕ рідина, скидаємо смаки в null (або просто не передаємо їх, 
+    // але краще null, щоб бекенд знав, що їх треба очистити, якщо ми редагуємо товар)
     const payload = {
       ...formData,
       slug: initialData?.slug || slug,
       price: Number(formData.price),
       stock: Number(formData.stock),
-      imageAlt: formData.name, // Авто-альт
+      imageAlt: formData.name, 
       images: formData.images.filter(img => img.url !== ''),
+      // Умовні поля смаку
+      ice: isLiquid ? formData.ice : null,
+      sweet: isLiquid ? formData.sweet : null,
+      sour: isLiquid ? formData.sour : null,
     };
 
     try {
-      // 🚀 3. ДОДАЛИ ТОКЕН ПРИ СТВОРЕННІ/ОНОВЛЕННІ ТОВАРУ
       const res = await fetch(isEditing ? `${API_URL}/products/${productId}` : `${API_URL}/products`, {
         method: isEditing ? 'PATCH' : 'POST',
         headers: { 
@@ -238,37 +243,39 @@ export default function ProductForm({ initialData, token }: { initialData?: any,
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className={`grid grid-cols-1 ${isLiquid ? 'md:grid-cols-2' : ''} gap-8`}>
         {/* 2. КАТЕГОРІЯ */}
         <div className="bg-[#1a1a1a] p-6 rounded-3xl border border-white/10 space-y-4">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 <span className="w-8 h-8 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center text-sm">2</span>
                 Категорія
             </h2>
-            <select value={formData.category} onChange={handleCategoryChange} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" required>
+            <select name="category" value={formData.category} onChange={handleCategoryChange} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" required>
                 <option value="" disabled>Виберіть категорію</option>
                 {CATEGORIES_DATA.map(cat => <option key={cat.id} value={cat.id}>{cat.label}</option>)}
             </select>
-            <select value={formData.brand} onChange={(e) => setFormData(p => ({ ...p, brand: e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" disabled={!formData.category}>
+            <select name="brand" value={formData.brand} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none" disabled={!formData.category}>
                 <option value="">Виберіть бренд</option>
                 {availableBrands.map(brand => <option key={brand.id} value={brand.id}>{brand.label}</option>)}
             </select>
         </div>
 
-        {/* 3. СМАКИ */}
-        <div className="bg-[#1a1a1a] p-6 rounded-3xl border border-white/10 space-y-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm">3</span>
-                Смаки
-            </h2>
-            {['ice', 'sweet', 'sour'].map(f => (
-                <div key={f} className="flex items-center gap-4">
-                    <span className="w-20 text-xs text-white/50 uppercase">{f === 'ice' ? 'Холод' : f === 'sweet' ? 'Солод' : 'Кислинка'}</span>
-                    <input type="range" name={f} min="1" max="5" value={formData[f as 'ice'|'sweet'|'sour']} onChange={handleChange} className="flex-1 accent-emerald-500" />
-                    <span className="text-white font-bold">{formData[f as 'ice'|'sweet'|'sour']}</span>
-                </div>
-            ))}
-        </div>
+        {/* 3. СМАКИ (Відображається ТІЛЬКИ якщо вибрано 'liquid') */}
+        {isLiquid && (
+          <div className="bg-[#1a1a1a] p-6 rounded-3xl border border-white/10 space-y-4 transition-all duration-300">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm">3</span>
+                  Профіль смаку
+              </h2>
+              {['ice', 'sweet', 'sour'].map(f => (
+                  <div key={f} className="flex items-center gap-4">
+                      <span className="w-20 text-xs text-white/50 uppercase">{f === 'ice' ? 'Холод' : f === 'sweet' ? 'Солод' : 'Кислинка'}</span>
+                      <input type="range" name={f} min="1" max="5" value={formData[f as 'ice'|'sweet'|'sour']} onChange={handleChange} className="flex-1 accent-emerald-500" />
+                      <span className="text-white font-bold">{formData[f as 'ice'|'sweet'|'sour']}</span>
+                  </div>
+              ))}
+          </div>
+        )}
       </div>
 
       {/* 4. МЕДІА */}

@@ -18,6 +18,7 @@ export async function generateStaticParams() {
   ]);
 }
 
+// 🚀 ПОТУЖНЕ ДИНАМІЧНЕ SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const product = await getProductById(id);
@@ -28,10 +29,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = `${product.name} — купити в Україні | Airpull`;
   const description = product.description
-    ? `${product.description.slice(0, 120)}. Ціна ${product.price} ₴. Швидка доставка по Україні.`
-    : `Купити ${product.name} за ціною ${product.price} ₴ in Airpull.`;
+    ? `${product.description.slice(0, 120)}. Ціна: ${product.price} ₴. Швидка доставка по Україні.`
+    : `Купити ${product.name} за ціною ${product.price} ₴ в інтернет-магазині Airpull. Оригінальна продукція.`;
 
   const canonicalUrl = `https://airpull.com.ua/product/${product.slug || product.id}`;
+  
+  const ogImage = product.imageUrl ? product.imageUrl : 'https://airpull.com.ua/logo.svg';
 
   return {
     title,
@@ -41,7 +44,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       url: canonicalUrl,
-      images: product.imageUrl ? [{ url: product.imageUrl }] : [],
+      type: 'website',
+      images: [
+        {
+          url: ogImage,
+          width: 800,
+          height: 800,
+          alt: product.name,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage],
     },
   };
 }
@@ -53,6 +70,9 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   const inStock = product.stock > 0;
+  
+  // 🚀 ПЕРЕВІРКА НА КАТЕГОРІЮ РІДИНИ
+  const isLiquid = product.category === 'liquid';
 
   // --- ЛОГІКА ЦІН ТА ЗНИЖКИ ---
   const currentPrice = Number(product.price);
@@ -97,8 +117,37 @@ export default async function ProductPage({ params }: Props) {
     </div>
   );
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: finalImages,
+    description: product.description || `Купити ${product.name} в Airpull`,
+    sku: product.id,
+    brand: {
+      '@type': 'Brand',
+      name: 'Airpull',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `https://airpull.com.ua/product/${product.slug || product.id}`,
+      priceCurrency: 'UAH',
+      price: currentPrice,
+      availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Organization',
+        name: 'Airpull',
+      },
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      
       <main className="bg-black min-h-screen pt-24 pb-24 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Breadcrumb */}
@@ -140,7 +189,7 @@ export default async function ProductPage({ params }: Props) {
                 </div>
               </div>
 
-              {/* СТАТУС НАЯВНОСТІ (Без кількості) */}
+              {/* СТАТУС НАЯВНОСТІ */}
               <div className="flex items-center gap-4 mb-8 pb-8 border-b border-white/10">
                 <span className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${
                   inStock ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
@@ -162,8 +211,8 @@ export default async function ProductPage({ params }: Props) {
                 </div>
               )}
 
-              {/* ПРОФІЛЬ СМАКУ */}
-              {(product.ice != null || product.sweet != null || product.sour != null) && (
+              {/* 🚀 ПРОФІЛЬ СМАКУ: Відображається ТІЛЬКИ якщо isLiquid === true */}
+              {isLiquid && (product.ice != null || product.sweet != null || product.sour != null) && (
                 <div className="mb-8 p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] flex flex-col gap-3">
                   <h2 className="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-1">Профіль смаку</h2>
                   {product.ice != null && renderTasteBar(product.ice, 'Холод', '❄️', 'bg-cyan-400/80 shadow-[0_0_8px_rgba(34,211,238,0.3)]')}

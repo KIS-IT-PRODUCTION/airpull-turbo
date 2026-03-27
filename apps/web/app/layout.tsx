@@ -7,21 +7,44 @@ import { Toaster } from 'react-hot-toast';
 export const metadata: Metadata = {
   metadataBase: new URL('https://airpull.com.ua'),
   title: {
-    default: 'Airpull — Вейпи та рідини з доставкою по Україні',
-    template: '%s | Airpull',
+    default: 'Airpull — Вейпи, Pod-системи та рідини в Україні',
+    template: '%s | Airpull', // %s буде замінено на назву сторінки
   },
-  description: 'Купити вейпи, електронні сигарети та рідини в Україні. Оригінальні товари, швидка доставка, ціни від виробника.',
+  description: 'Інтернет-магазин вейпінгу Airpull. Купити електронні сигарети, рідини, картриджі та аксесуари. Оригінальні товари, швидка доставка по всій Україні.',
+  keywords: ['вейп', 'купити вейп', 'електронні сигарети', 'pod системи', 'рідина для вейпу', 'сольова рідина', 'одноразки', 'Airpull', 'Україна'],
   openGraph: {
     siteName: 'Airpull',
     locale: 'uk_UA',
     type: 'website',
+    url: 'https://airpull.com.ua',
+    images: [
+      {
+        url: '/og-home.jpg', // Зроби красиву картинку 1200x630px і поклади в папку public
+        width: 1200,
+        height: 630,
+        alt: 'Airpull Shop',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Airpull — Вейпи та рідини',
+    description: 'Оригінальні товари для вейпінгу зі швидкою доставкою.',
+    images: ['/og-home.jpg'],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
-    icons: {
-    icon: '/logo.svg',
+  icons: {
+    icon: '/logo.svg', // Переконайся, що цей файл є в папці public
     shortcut: '/logo.svg',
     apple: '/logo.svg',
   },
