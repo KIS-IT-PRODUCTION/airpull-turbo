@@ -120,7 +120,7 @@ export default function ProductForm({ initialData, token }: { initialData?: any,
   const uploadFile = async (file: File) => {
     const uploadData = new FormData();
     uploadData.append('file', file);
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4004';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
     
     // 🚀 2. ДОДАЛИ ТОКЕН ПРИ ЗАВАНТАЖЕННІ ФОТО
     const res = await fetch(`${API_URL}/upload/single`, {

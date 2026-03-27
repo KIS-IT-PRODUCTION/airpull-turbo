@@ -65,8 +65,24 @@ export class AuthService implements OnModuleInit {
       }
     });
 
-    this.bot.launch();
-    console.log('🤖 Telegram Бот успішно запущено і він слухає клієнтів!');
+    this.bot.catch((err, ctx) => {
+      console.error(`[Telegram Bot Error] Сталася помилка:`, err);
+    });
+
+    // 🚀 ОНОВЛЕНИЙ ЗАПУСК БОТА:
+    this.bot.launch().then(() => {
+      console.log('🤖 Telegram Бот успішно запущено і він слухає клієнтів!');
+    }).catch((err) => {
+      if (err.response && err.response.error_code === 409) {
+        console.warn('⚠️ Бот вже запущений в іншому процесі (Hot Reload). Ігноруємо...');
+      } else {
+        console.error('❌ Не вдалося запустити Telegram бота:', err.message);
+      }
+    });
+
+    // Правильна зупинка бота при вимкненні сервера
+    process.once('SIGINT', () => this.bot.stop('SIGINT'));
+    process.once('SIGTERM', () => this.bot.stop('SIGTERM'));
   }
 
   async sendCode(phone: string) {

@@ -15,7 +15,7 @@ import { AdminGuard } from '../auth/admin.guard';
 import { AuthGuard } from '../auth/auth.guard';
 
 const uploadDir = join(process.cwd(), 'uploads');
-
+const baseUrl = process.env.API_URL;
 if (!existsSync(uploadDir)) {
   mkdirSync(uploadDir, { recursive: true });
 }
@@ -52,7 +52,7 @@ export class UploadController {
     if (!file) throw new BadRequestException('Файл не завантажено');
     
     return { 
-      url: `http://localhost:4004/uploads/${file.filename}`,
+      url: `${baseUrl}/uploads/${file.filename}`,
       filename: file.filename 
     };
   }
@@ -69,7 +69,7 @@ export class UploadController {
     if (!files || files.length === 0) throw new BadRequestException('Файли не завантажено');
 
     return files.map((file, index) => ({
-      url: `http://localhost:4004/uploads/${file.filename}`,
+      url: `${baseUrl}/uploads/${file.filename}`,
       alt: file.originalname,
       order: index
     }));

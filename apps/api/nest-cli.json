@@ -10,5 +10,8 @@
         "watchAssets": true
       }
     ]
+  },
+  "watchOptions": {
+    "exclude": ["uploads", "uploads/**/*"]
   }
 }

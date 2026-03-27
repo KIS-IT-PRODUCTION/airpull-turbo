@@ -20,12 +20,15 @@ async function bootstrap() {
 
   app.enableCors({
     origin: allowedOrigins,
-    credentials: true, // Дозволяє отримувати куки
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type,Authorization',
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
   });
+  
+  app.enableShutdownHooks();
 
   const uploadDir = join(process.cwd(), 'uploads');
+  
   app.useStaticAssets(uploadDir, {
     prefix: '/uploads/',
   });
