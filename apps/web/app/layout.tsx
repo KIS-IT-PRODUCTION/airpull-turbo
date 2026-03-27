@@ -5,7 +5,7 @@ import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/ui/CartDrawer';
 import { Toaster } from 'react-hot-toast';
 export const metadata: Metadata = {
-  metadataBase: new URL('https://airpull.com.ua'),
+  metadataBase: new URL('https://airpull-turbo-web.vercel.app'),
   title: {
     default: 'Airpull — Вейпи, Pod-системи та рідини в Україні',
     template: '%s | Airpull', // %s буде замінено на назву сторінки
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     siteName: 'Airpull',
     locale: 'uk_UA',
     type: 'website',
-    url: 'https://airpull.com.ua',
+    url: 'https://airpull-turbo-web.vercel.app',
     images: [
       {
         url: '/og-home.jpg', // Зроби красиву картинку 1200x630px і поклади в папку public

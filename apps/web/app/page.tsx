@@ -9,12 +9,12 @@ export const metadata: Metadata = {
   title: 'Airpull — Вейпи та електронні сигарети в Україні',
   description: 'Купити вейпи та електронні сигарети з доставкою по Україні. Великий вибір, оригінальна продукція, ціни від виробника. Замовляй зараз!',
   alternates: {
-    canonical: 'https://airpull.com.ua',
+    canonical: 'https://airpull-turbo-web.vercel.app/',
   },
   openGraph: {
     title: 'Airpull — Вейпи та електронні сигарети в Україні',
     description: 'Великий вибір вейпів та рідин. Оригінальна продукція, швидка доставка по Україні.',
-    url: 'https://airpull.com.ua',
+    url: 'https://airpull-turbo-web.vercel.app/',
     images: [{ url: '/og-home.jpg', width: 1200, height: 630, alt: 'Airpull — магазин вейпів' }],
   },
 };
@@ -23,11 +23,11 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'Airpull',
-  url: 'https://airpull.com.ua',
+  url: 'https://airpull-turbo-web.vercel.app',
   description: 'Інтернет-магазин вейпів та електронних сигарет в Україні',
   potentialAction: {
     '@type': 'SearchAction',
-    target: 'https://airpull.com.ua/catalog?q={search_term_string}',
+    target: 'https://airpull-turbo-web.vercel.app/catalog?q={search_term_string}',
     'query-input': 'required name=search_term_string',
   },
 };
