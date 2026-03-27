@@ -30,35 +30,23 @@ export default function LoginPage() {
 
       const data = await res.json();
 
+      // Обробка ситуації, коли користувач ще не підключив бота
       if (data.message === 'TELEGRAM_NOT_LINKED') {
-        toast.error(
-          <div className="flex flex-col gap-2">
-            <span className="font-bold">Бот не знає ваш номер!</span>
-            <span className="text-xs opacity-80">Щоб отримати код, запустіть нашого бота:</span>
-            <a 
-              href="https://t.me/AirPullBot"
-              target="_blank" 
-              rel="noreferrer"
-              className="mt-1 px-4 py-2 bg-blue-500 text-white text-center text-xs font-bold rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Відкрити Telegram
-            </a>
-          </div>,
-          { duration: 6000 }
-        );
+        setError("Бот не знає цей номер. Будь ласка, перейдіть у нашого Telegram-бота та натисніть «Поділитися контактом».");
+        toast.error('Номер не знайдено в базі бота!', { duration: 4000 });
         setIsLoading(false);
         return;
       }
 
       if (res.ok) {
         setStep(2);
-        toast.success('Код відправлено в Telegram!');
+        toast.success('Код успішно відправлено в Telegram!');
       } else {
-        setError(data.message || 'Помилка відправки коду');
+        setError(data.message || 'Помилка відправки коду. Перевірте номер.');
       }
     } catch (err) {
       console.error(err);
-      setError("Сталася помилка з'єднання з сервером");
+      setError("Сталася помилка з'єднання з сервером. Спробуйте пізніше.");
     } finally {
       setIsLoading(false);
     }
@@ -80,91 +68,152 @@ export default function LoginPage() {
       router.push("/"); 
       
     } catch (err: any) {
-      setError(err.message || "Сталася помилка. Перевірте код.");
+      setError(err.message || "Невірний код. Спробуйте ще раз.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-black flex items-center justify-center relative px-4 overflow-hidden">
+    <main className="min-h-screen bg-[#050505] flex items-center justify-center relative px-4 overflow-hidden py-12">
+      {/* Декоративний фон */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-violet-600/20 rounded-full blur-[100px]" />
-        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-pink-600/15 rounded-full blur-[100px]" />
+        <div className="absolute top-[10%] -left-[10%] w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[10%] -right-[10%] w-[500px] h-[500px] bg-pink-600/10 rounded-full blur-[120px]" />
       </div>
 
-      <div className="relative z-10 w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-block mb-6">
-            <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-pink-400 to-orange-400">
-              Airpull
-            </h1>
-          </Link>
-          <h2 className="text-3xl font-bold text-white mb-2">
-            Вхід у систему
-          </h2>
-          <p className="text-white/50 text-sm">
-            {step === 1 ? "Введи номер телефону та ім'я" : `Код відправлено на ${phone}`}
-          </p>
-        </div>
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center">
+        {/* Логотип */}
+        <Link href="/" className="group mb-8 flex flex-col items-center">
+          <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-white/10 group-hover:border-violet-500/30 transition-all duration-500 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(139,92,246,0.2)]">
+            <span className="text-3xl text-transparent bg-clip-text bg-gradient-to-br from-violet-400 to-pink-400 font-black">
+              A
+            </span>
+          </div>
+          <h1 className="text-2xl font-black text-white tracking-tight">
+            Airpull
+          </h1>
+        </Link>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-2xl">
+        {/* Основна картка */}
+        <div className="w-full bg-[#0A0A0A]/80 border border-white/10 rounded-[32px] p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+          
+          {/* Світлий блік зверху картки */}
+          <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
+
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+              {step === 1 ? "Вхід у систему" : "Перевірка коду"}
+            </h2>
+            <p className="text-white/50 text-sm leading-relaxed px-2">
+              {step === 1 
+                ? "Увійди або зареєструйся через номер телефону" 
+                : `Ми відправили 4-значний код у Telegram на номер `}
+              {step === 2 && <span className="font-bold text-white block mt-1">{phone}</span>}
+            </p>
+          </div>
+
+          {/* Вивід помилок */}
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center font-medium">
+            <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center font-medium leading-relaxed animate-in fade-in slide-in-from-top-2 duration-300">
               {error}
             </div>
           )}
 
           {step === 1 && (
-            <form onSubmit={handleSendCode} className="space-y-6">
-              <div>
-                <label className="block text-violet-400 font-semibold text-xs uppercase tracking-widest mb-2">
-                  Ім'я (Необов'язково)
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all font-medium"
-                  placeholder="Твоє ім'я"
-                />
+            <div className="space-y-6">
+              {/* ІНФОРМАЦІЙНИЙ БЛОК ПРО БОТА */}
+              <div className="bg-gradient-to-br from-blue-500/10 to-violet-500/10 border border-blue-500/20 rounded-2xl p-5 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
+                <div className="flex gap-4 items-start relative z-10">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                    <span className="text-xl">🤖</span>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-sm mb-1">Вперше у нас?</h3>
+                    <p className="text-white/60 text-xs leading-relaxed mb-3">
+                      Щоб отримувати коди авторизації та сповіщення про замовлення, потрібно підключити нашого Telegram-бота.
+                    </p>
+                    <a 
+                      href="https://t.me/AirPullBot" 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 text-xs font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-2 rounded-xl transition-colors"
+                    >
+                      <span>Відкрити бота</span>
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-violet-400 font-semibold text-xs uppercase tracking-widest mb-2">
-                  Номер телефону
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all font-medium"
-                  placeholder="+380991234567"
-                  required
-                />
-              </div>
-              
-              <button
-                type="submit"
-                disabled={isLoading || phone.length < 10}
-                className="w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-violet-500 to-pink-500 hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-violet-500/20"
-              >
-                {isLoading ? "Відправка..." : "Отримати код →"}
-              </button>
-            </form>
+              <form onSubmit={handleSendCode} className="space-y-5">
+                <div className="space-y-1.5">
+                  <label className="text-white/40 font-bold text-[10px] uppercase tracking-widest pl-1">
+                    Твоє ім'я (для нових клієнтів)
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:border-violet-500/50 focus:bg-white/[0.05] transition-all font-medium text-sm"
+                    placeholder="Як до тебе звертатися?"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-white/40 font-bold text-[10px] uppercase tracking-widest pl-1 flex justify-between items-center">
+                    <span>Номер телефону</span>
+                    <span className="text-red-400 text-[10px]">* Обов'язково</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full px-5 py-4 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:border-violet-500/50 focus:bg-white/[0.05] transition-all font-medium text-lg tracking-wide"
+                    placeholder="+380"
+                    required
+                  />
+                </div>
+                
+                {/* 🚀 ВІДНОВЛЕНО ГРАДІЄНТ ТА СТИЛІ КНОПКИ */}
+                <button
+                  type="submit"
+                  disabled={isLoading || phone.length < 12} // +380 + 9 цифр
+                  className="w-full py-4 mt-2 rounded-xl font-bold text-white bg-gradient-to-r from-violet-500 to-pink-500 hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-violet-500/20 flex justify-center items-center gap-2 group"
+                >
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Відправка...
+                    </span>
+                  ) : (
+                    <>
+                      Отримати код у Telegram
+                      <span className="group-hover:translate-x-1 transition-transform">→</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
           )}
 
           {step === 2 && (
-            <form onSubmit={handleVerifyCode} className="space-y-6">
-              <div>
-                <label className="block text-violet-400 font-semibold text-xs uppercase tracking-widest mb-2 text-center">
-                  Код з Telegram
+            <form onSubmit={handleVerifyCode} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="space-y-1.5">
+                <label className="text-white/40 font-bold text-[10px] uppercase tracking-widest text-center block w-full">
+                  Код підтвердження
                 </label>
                 <input
                   type="text"
                   value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all text-center text-2xl tracking-[0.5em] font-bold"
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, ''); // Тільки цифри
+                    if (val.length <= 4) setCode(val);
+                  }}
+                  className="w-full px-5 py-5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-white/10 focus:outline-none focus:border-violet-500/50 focus:bg-white/[0.05] transition-all text-center text-4xl tracking-[0.7em] font-black font-mono pl-[calc(1.25rem+0.7em)]"
                   placeholder="••••"
                   maxLength={4}
                   autoComplete="one-time-code"
@@ -173,15 +222,17 @@ export default function LoginPage() {
                 />
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-4 pt-2">
+                {/* 🚀 ВІДНОВЛЕНО ГРАДІЄНТ ТА СТИЛІ КНОПКИ */}
                 <button
                   type="submit"
                   disabled={isLoading || code.length < 4}
                   className="w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-violet-500 to-pink-500 hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-violet-500/20"
                 >
-                  {isLoading ? "Перевірка..." : "Увійти"}
+                  {isLoading ? "Перевіряємо..." : "Увійти"}
                 </button>
                 
+                {/* 🚀 ВІДНОВЛЕНО СТИЛЬ КНОПКИ "НАЗАД" */}
                 <button
                   type="button"
                   onClick={() => {
@@ -198,11 +249,15 @@ export default function LoginPage() {
           )}
         </div>
 
-        <p className="text-center text-white/30 text-xs mt-8">
+        <p className="text-center text-white/30 text-[11px] mt-8 max-w-xs leading-relaxed">
           Продовжуючи, ти погоджуєшся з нашими{' '}
-          <Link href="/terms" className="underline hover:text-white/60 transition-colors">
-            правилами користування
-          </Link>
+          <Link href="/terms" className="text-white/50 hover:text-white underline decoration-white/20 hover:decoration-white transition-all">
+            Умовами використання
+          </Link>{' '}
+          та{' '}
+          <Link href="/privacy" className="text-white/50 hover:text-white underline decoration-white/20 hover:decoration-white transition-all">
+            Політикою конфіденційності
+          </Link>.
         </p>
       </div>
     </main>
