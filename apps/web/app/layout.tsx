@@ -44,9 +44,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: '/logo.svg', // Переконайся, що цей файл є в папці public
-    shortcut: '/logo.svg',
-    apple: '/logo.svg',
+    icon: '/logo_0.svg',
+    shortcut: '/logo_0.svg',
+    apple: '/logo_0.svg',
   },
 };
 
