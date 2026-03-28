@@ -8,27 +8,10 @@ import {
   UseGuards
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
 import { AdminGuard } from '../auth/admin.guard';
 import { AuthGuard } from '../auth/auth.guard';
-
-const uploadDir = join(process.cwd(), 'uploads');
-const baseUrl = process.env.API_URL;
-if (!existsSync(uploadDir)) {
-  mkdirSync(uploadDir, { recursive: true });
-}
-
-const storageConfig = diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
-  },
-});
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { ImageOptimizerService } from './image-optimizer.service';
 
 const imageFileFilter = (req: any, file: any, cb: any) => {
   if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
@@ -39,21 +22,35 @@ const imageFileFilter = (req: any, file: any, cb: any) => {
 
 @Controller('upload')
 export class UploadController {
+  constructor(
+    private readonly cloudinaryService: CloudinaryService,
+    private readonly imageOptimizerService: ImageOptimizerService
+  ) {}
   
   @Post('single')
   @UseGuards(AuthGuard, AdminGuard)
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: storageConfig,
       fileFilter: imageFileFilter,
     }),
   )
-  uploadFile(@UploadedFile() file: any) {
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('Файл не завантажено');
     
+    const optimizedBuffer = await this.imageOptimizerService.optimize(file);
+    
+    const optimizedFile = {
+      ...file,
+      buffer: optimizedBuffer,
+      originalname: `${file.originalname.split('.')[0]}.webp`,
+      mimetype: 'image/webp',
+    };
+
+    const result = await this.cloudinaryService.uploadFile(optimizedFile);
+    
     return { 
-      url: `${baseUrl}/uploads/${file.filename}`,
-      filename: file.filename 
+      url: result.secure_url,
+      filename: result.public_id 
     };
   }
 
@@ -61,17 +58,33 @@ export class UploadController {
   @UseGuards(AuthGuard, AdminGuard)
   @UseInterceptors(
     FilesInterceptor('files', 20, {
-      storage: storageConfig,
       fileFilter: imageFileFilter,
     }),
   )
-  uploadFiles(@UploadedFiles() files: any[]) {
+  async uploadFiles(@UploadedFiles() files: Express.Multer.File[]) {
     if (!files || files.length === 0) throw new BadRequestException('Файли не завантажено');
 
-    return files.map((file, index) => ({
-      url: `${baseUrl}/uploads/${file.filename}`,
-      alt: file.originalname,
-      order: index
-    }));
+    const uploadedFiles = await Promise.all(
+      files.map(async (file, index) => {
+        const optimizedBuffer = await this.imageOptimizerService.optimize(file);
+        
+        const optimizedFile = {
+          ...file,
+          buffer: optimizedBuffer,
+          originalname: `${file.originalname.split('.')[0]}.webp`,
+          mimetype: 'image/webp',
+        };
+
+        const result = await this.cloudinaryService.uploadFile(optimizedFile);
+        
+        return {
+          url: result.secure_url,
+          alt: file.originalname,
+          order: index
+        };
+      })
+    );
+
+    return uploadedFiles;
   }
 }

@@ -27,12 +27,6 @@ async function bootstrap() {
   
   app.enableShutdownHooks();
 
-  const uploadDir = join(process.cwd(), 'uploads');
-  
-  app.useStaticAssets(uploadDir, {
-    prefix: '/uploads/',
-  });
-
   const config = new DocumentBuilder()
     .setTitle('Airpull API')
     .setDescription('Документація')

@@ -5,13 +5,14 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
 import { AuthModule } from './auth/auth.module';
 import { OrdersModule } from './orders/orders.module';
-import { UploadController } from './upload/upload.controller'
+import { UploadModule } from './upload/upload.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { PromotionsModule } from './promotions/promotions.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
-  imports: [PrismaModule, ProductsModule, AuthModule, OrdersModule, DashboardModule, PromotionsModule],
-  controllers: [AppController, UploadController],
+  imports: [PrismaModule, ProductsModule, AuthModule, OrdersModule, DashboardModule, PromotionsModule, CloudinaryModule, UploadModule],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
